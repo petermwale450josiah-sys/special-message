@@ -1,0 +1,366 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#160f2c">
+
+<title>A Message For You ❤️</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: Georgia, serif;
+  color: white;
+  background: radial-gradient(circle at top, #49305e, #160f2c 70%);
+  overflow-x: hidden;
+  text-align: center;
+}
+
+.container {
+  width: 90%;
+  max-width: 600px;
+  margin: auto;
+  padding: 65px 15px;
+  position: relative;
+  z-index: 2;
+}
+
+.small-title {
+  color: #ffc5dc;
+  letter-spacing: 4px;
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+}
+
+h1 {
+  font-size: clamp(34px, 8vw, 52px);
+  color: #ffd2e5;
+  margin: 20px 0;
+  animation: glow 2s infinite alternate;
+}
+
+@keyframes glow {
+  from { text-shadow: 0 0 5px #ff8bb8; }
+  to { text-shadow: 0 0 25px #ff5d9e; }
+}
+
+.intro {
+  font-size: 18px;
+  line-height: 1.8;
+  color: #f1e8f5;
+}
+
+button {
+  background: linear-gradient(120deg, #ff659a, #b75ce5);
+  border: none;
+  color: white;
+  border-radius: 30px;
+  padding: 15px 25px;
+  font-size: 16px;
+  cursor: pointer;
+  margin: 12px 5px;
+  box-shadow: 0 5px 20px #0005;
+}
+
+button:active {
+  transform: scale(0.96);
+}
+
+#messageArea {
+  display: none;
+  margin-top: 35px;
+  padding: 25px 20px;
+  background: #ffffff12;
+  border: 1px solid #ffffff30;
+  border-radius: 20px;
+  backdrop-filter: blur(8px);
+  line-height: 1.9;
+  font-size: 19px;
+  min-height: 160px;
+}
+
+#typedMessage {
+  white-space: pre-line;
+}
+
+.cursor {
+  display: inline-block;
+  animation: blink 0.7s infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+.heart {
+  position: fixed;
+  bottom: -30px;
+  z-index: 1;
+  pointer-events: none;
+  animation: floatUp linear forwards;
+}
+
+@keyframes floatUp {
+  from {
+    transform: translateY(0) rotate(0);
+    opacity: 0.9;
+  }
+  to {
+    transform: translateY(-110vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+.controls {
+  margin-top: 25px;
+}
+
+footer {
+  margin-top: 45px;
+  color: #d7c6e5;
+  font-size: 13px;
+}
+
+.hidden {
+  display: none;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <p class="small-title">A LITTLE REMINDER FOR YOU</p>
+
+  <h1>Hey, Beautiful Soul ❤️</h1>
+
+  <p class="intro">
+    Sometimes life gets difficult, but there is
+    something I want you to remember...
+  </p>
+
+  <button id="openButton" onclick="openSurprise()">
+    Open Your Message ✨
+  </button>
+
+  <div id="messageArea">
+    <div id="typedMessage"></div>
+    <span class="cursor">|</span>
+  </div>
+
+  <div class="controls hidden" id="controls">
+    <button onclick="toggleMusic()" id="musicButton">
+      🎵 Play Background Music
+    </button>
+
+    <button onclick="restartMessage()">
+      Read Again ❤️
+    </button>
+  </div>
+
+  <footer>
+    Believe in yourself. Your story is still being written. ✨
+  </footer>
+
+</div>
+
+<script>
+
+// CUSTOMISE THESE DETAILS
+const recipientName = "Beautiful Soul";
+
+// Write your own motivational messages here
+const messages = [
+  `Dear ${recipientName},
+
+Never underestimate the person you are becoming.
+
+You have survived days you thought you would never get through.
+You have faced challenges that nobody knows about.
+
+And still, here you are. Still trying. Still dreaming. Still moving forward.`,
+
+  `Remember this:
+
+Your journey does not have to look like everyone else's.
+Your progress does not have to be fast.
+Your dreams are still valid, even when the road gets difficult.
+
+Do not allow temporary situations to convince you that you have a permanent limitation.`,
+
+  `Keep believing in yourself.
+Keep working on your dreams.
+Keep becoming the person you were always meant to be.
+
+One day, you will look back and understand why you had to be strong.`,
+
+  `YOU ARE CAPABLE OF GREAT THINGS. ❤️
+
+Never give up on yourself.
+Your best chapters may still be ahead of you.
+
+With love and belief in you. ✨`
+];
+
+let messageIndex = 0;
+let typingTimer = null;
+let musicTimer = null;
+let audioContext = null;
+let musicPlaying = false;
+
+function openSurprise() {
+  document.getElementById("openButton").classList.add("hidden");
+  document.getElementById("messageArea").style.display = "block";
+  document.getElementById("controls").classList.remove("hidden");
+
+  createHearts();
+  typeMessage();
+}
+
+function typeMessage() {
+  clearInterval(typingTimer);
+
+  const display = document.getElementById("typedMessage");
+  const cursor = document.querySelector(".cursor");
+
+  if (messageIndex >= messages.length) {
+    display.innerHTML = "❤️";
+    cursor.style.display = "none";
+    return;
+  }
+
+  cursor.style.display = "inline-block";
+
+  const message = messages[messageIndex];
+  let character = 0;
+
+  display.textContent = "";
+
+  typingTimer = setInterval(() => {
+    display.textContent += message.charAt(character);
+    character++;
+
+    if (character >= message.length) {
+      clearInterval(typingTimer);
+
+      setTimeout(() => {
+        messageIndex++;
+        typeMessage();
+      }, 2500);
+    }
+  }, 45);
+}
+
+function restartMessage() {
+  messageIndex = 0;
+  typeMessage();
+  createHearts();
+}
+
+function createHearts() {
+  const symbols = ["❤️", "💖", "💕", "✨", "💗"];
+
+  for (let i = 0; i < 12; i++) {
+    const heart = document.createElement("div");
+
+    heart.className = "heart";
+    heart.textContent =
+      symbols[Math.floor(Math.random() * symbols.length)];
+
+    heart.style.left = Math.random() * 100 + "vw";
+    heart.style.fontSize = (15 + Math.random() * 22) + "px";
+    heart.style.animationDuration = (5 + Math.random() * 5) + "s";
+
+    document.body.appendChild(heart);
+
+    setTimeout(() => heart.remove(), 11000);
+  }
+}
+
+// Generate a gentle original ambient melody.
+// Music starts only after the recipient presses the button.
+
+async function toggleMusic() {
+  if (musicPlaying) {
+    stopMusic();
+    return;
+  }
+
+  const AudioEngine = window.AudioContext || window.webkitAudioContext;
+
+  if (!AudioEngine) {
+    alert("Your browser does not support background music.");
+    return;
+  }
+
+  if (!audioContext) {
+    audioContext = new AudioEngine();
+  }
+
+  await audioContext.resume();
+
+  musicPlaying = true;
+
+  document.getElementById("musicButton").textContent =
+    "⏸ Pause Background Music";
+
+  const notes = [261.63, 329.63, 392.00, 329.63,
+                 293.66, 349.23, 440.00, 349.23];
+
+  let noteIndex = 0;
+
+  function playNote() {
+    if (!musicPlaying) return;
+
+    const oscillator = audioContext.createOscillator();
+    const volume = audioContext.createGain();
+
+    oscillator.type = "sine";
+    oscillator.frequency.value = notes[noteIndex];
+
+    volume.gain.setValueAtTime(0.0001, audioContext.currentTime);
+    volume.gain.exponentialRampToValueAtTime(
+      0.055, audioContext.currentTime + 0.15
+    );
+    volume.gain.exponentialRampToValueAtTime(
+      0.0001, audioContext.currentTime + 1.5
+    );
+
+    oscillator.connect(volume);
+    volume.connect(audioContext.destination);
+
+    oscillator.start();
+    oscillator.stop(audioContext.currentTime + 1.6);
+
+    noteIndex = (noteIndex + 1) % notes.length;
+  }
+
+  playNote();
+  musicTimer = setInterval(playNote, 1700);
+}
+
+function stopMusic() {
+  musicPlaying = false;
+  clearInterval(musicTimer);
+
+  document.getElementById("musicButton").textContent =
+    "🎵 Play Background Music";
+
+  if (audioContext && audioContext.state === "running") {
+    audioContext.suspend();
+  }
+}
+
+</script>
+
+</body>
+</html>
